@@ -1,0 +1,73 @@
+name: deploy-ecs-worker
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docker/**'
+      - '.github/workflows/deploy-ecs-worker.yml'
+      - 'ecs-task-def-worker.json'
+      - '**/*.php'
+      - 'resources/**'
+      - 'routes/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}           # same repo as app
+  ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+  ECS_WORKER_SERVICE: ${{ vars.ECS_WORKER_SERVICE }}   # e.g. qrpay-worker-service
+  CONTAINER_NAME: worker
+
+jobs:
+  build-and-deploy-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -f docker/Dockerfile -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+          echo "IMAGE_URI=$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Render ECS worker task definition
+        id: render-taskdef
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ecs-task-def-worker.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ env.IMAGE_URI }}
+
+      - name: Register worker task definition revision
+        id: register-td
+        env:
+          RENDERED_TD: ${{ steps.render-taskdef.outputs.task-definition }}
+        run: |
+          set -euo pipefail
+          TD_ARN=$(aws ecs register-task-definition --cli-input-json file://$RENDERED_TD --query 'taskDefinition.taskDefinitionArn' --output text)
+          echo "TASKDEF_ARN=$TD_ARN" >> $GITHUB_ENV
+
+      - name: Update ECS worker service
+        run: |
+          set -euo pipefail
+          aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_WORKER_SERVICE" --task-definition "$TASKDEF_ARN"
+          aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$ECS_WORKER_SERVICE"

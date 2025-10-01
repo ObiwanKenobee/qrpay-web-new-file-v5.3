@@ -1,0 +1,25 @@
+# Exclude files/folders from Docker build context
+.git
+.gitignore
+node_modules
+vendor
+storage/*.key
+storage/*.log
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/testing
+storage/framework/views
+bootstrap/cache/*.php
+.env
+.env.*
+Dockerfile
+docker-compose.yml
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.idea
+.vscode
+coverage
+*.local
+**/*.swp

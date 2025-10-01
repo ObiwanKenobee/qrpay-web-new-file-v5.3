@@ -8,7 +8,7 @@
   "taskRoleArn": "arn:aws:iam::{{AWS_ACCOUNT_ID}}:role/{{ECS_TASK_ROLE}}",
   "containerDefinitions": [
     {
-      "name": "{{CONTAINER_NAME}}",
+      "name": "worker",
       "image": "{{IMAGE_NAME}}",
       "essential": true,
       "command": ["php","artisan","queue:work","--sleep=3","--tries=3","--max-time=3600"],

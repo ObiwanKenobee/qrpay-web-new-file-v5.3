@@ -13,7 +13,7 @@ env:
   ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}           # e.g. qrpay-app
   ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}                 # e.g. qrpay-cluster
   ECS_SERVICE: ${{ vars.ECS_SERVICE }}                 # e.g. qrpay-service
-  CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}           # e.g. app
+  CONTAINER_NAME: app                                 # set default container name; override via repo vars if needed
 
 jobs:
   build-and-deploy:
