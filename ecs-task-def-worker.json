@@ -1,0 +1,37 @@
+{
+  "family": "qrpay-worker",
+  "networkMode": "awsvpc",
+  "cpu": "512",
+  "memory": "1024",
+  "requiresCompatibilities": ["FARGATE"],
+  "executionRoleArn": "arn:aws:iam::{{AWS_ACCOUNT_ID}}:role/{{ECS_TASK_EXECUTION_ROLE}}",
+  "taskRoleArn": "arn:aws:iam::{{AWS_ACCOUNT_ID}}:role/{{ECS_TASK_ROLE}}",
+  "containerDefinitions": [
+    {
+      "name": "{{CONTAINER_NAME}}",
+      "image": "{{IMAGE_NAME}}",
+      "essential": true,
+      "command": ["php","artisan","queue:work","--sleep=3","--tries=3","--max-time=3600"],
+      "environment": [
+        { "name": "APP_ENV", "value": "production" }
+      ],
+      "secrets": [
+        { "name": "APP_KEY", "valueFrom": "{{SM_APP_KEY_ARN}}" },
+        { "name": "DB_HOST", "valueFrom": "{{SM_DB_HOST_ARN}}" },
+        { "name": "DB_DATABASE", "valueFrom": "{{SM_DB_NAME_ARN}}" },
+        { "name": "DB_USERNAME", "valueFrom": "{{SM_DB_USER_ARN}}" },
+        { "name": "DB_PASSWORD", "valueFrom": "{{SM_DB_PASS_ARN}}" },
+        { "name": "REDIS_HOST", "valueFrom": "{{SM_REDIS_HOST_ARN}}" },
+        { "name": "AWS_BUCKET", "valueFrom": "{{SM_S3_BUCKET_ARN}}" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/qrpay-worker",
+          "awslogs-region": "{{AWS_REGION}}",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}

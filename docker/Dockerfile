@@ -92,6 +92,6 @@ ENV APP_ENV=production \
     MIGRATE_ON_BOOT=false
 
 EXPOSE 80
-HEALTHCHECK --interval=30s --timeout=5s --retries=5 CMD curl -fsS http://localhost/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --retries=5 CMD curl -fsS http://localhost/health.php || exit 1
 
 ENTRYPOINT ["/bin/bash","/entrypoint.sh"]

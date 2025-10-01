@@ -49,10 +49,45 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ env.IMAGE_URI }}
 
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.render-taskdef.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+      - name: Register task definition revision
+        id: register-td
+        env:
+          RENDERED_TD: ${{ steps.render-taskdef.outputs.task-definition }}
+        run: |
+          set -euo pipefail
+          TD_ARN=$(aws ecs register-task-definition --cli-input-json file://$RENDERED_TD --query 'taskDefinition.taskDefinitionArn' --output text)
+          echo "TASKDEF_ARN=$TD_ARN" >> $GITHUB_ENV
+
+      - name: Run database migrations (one-off task) [optional]
+        if: ${{ vars.MIGRATE_BEFORE_DEPLOY == 'true' }}
+        env:
+          SUBNETS: ${{ vars.ECS_SUBNETS }}
+          SECURITY_GROUPS: ${{ vars.ECS_SECURITY_GROUPS }}
+        run: |
+          set -euo pipefail
+          if [ -z "$SUBNETS" ] || [ -z "$SECURITY_GROUPS" ]; then
+            echo "ECS_SUBNETS or ECS_SECURITY_GROUPS not set in repo variables; skipping migrations";
+            exit 0;
+          fi
+          TASK_JSON=$(aws ecs run-task \
+            --cluster "$ECS_CLUSTER" \
+            --launch-type FARGATE \
+            --task-definition "$TASKDEF_ARN" \
+            --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUPS],assignPublicIp=ENABLED}" \
+            --overrides '{"containerOverrides":[{"name":"'"$CONTAINER_NAME"'","command":["php","artisan","migrate","--force"]}]}' )
+          TASK_ARN=$(echo "$TASK_JSON" | jq -r '.tasks[0].taskArn')
+          echo "Started migration task: $TASK_ARN"
+          aws ecs wait tasks-stopped --cluster "$ECS_CLUSTER" --tasks "$TASK_ARN"
+          DESC=$(aws ecs describe-tasks --cluster "$ECS_CLUSTER" --tasks "$TASK_ARN")
+          EXIT_CODE=$(echo "$DESC" | jq -r '.tasks[0].containers[0].exitCode')
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "Migration task failed with exit code $EXIT_CODE" >&2
+            exit 1
+          fi
+          echo "Migrations completed successfully"
+
+      - name: Update ECS service to new task definition
+        run: |
+          set -euo pipefail
+          aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" --task-definition "$TASKDEF_ARN"
+          aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE"

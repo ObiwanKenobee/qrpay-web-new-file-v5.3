@@ -32,5 +32,10 @@ if [ "${MIGRATE_ON_BOOT:-false}" = "true" ]; then
   php artisan migrate --force --no-ansi || true
 fi
 
+# If a command is provided, run it instead of Supervisor (useful for one-off tasks like migrations)
+if [ "$#" -gt 0 ]; then
+  exec "$@"
+fi
+
 # Start Supervisor to run php-fpm and nginx
 exec /usr/bin/supervisord -c /etc/supervisord.conf
