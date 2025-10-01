@@ -1834,16 +1834,16 @@ function get_user_notifications()
 }
 function selectedLang(){
     $default_language = Language::where('status',GlobalConst::ACTIVE)->first();
-    $default_language_code = $default_language->code ?? LanguageConst::NOT_REMOVABLE;
+    $default_language_code = optional($default_language)->code ?? LanguageConst::NOT_REMOVABLE;
     return session()->get('local')?? $default_language_code;
 }
 function selectedLangDir(){
     if(session()->get('local')){
-    $default_language = Language::where('code',session()->get('local'))->first();
-    $default_language_dir = $default_language->dir ?? LanguageConst::NOT_REMOVABLE;
+        $default_language = Language::where('code',session()->get('local'))->first();
+        $default_language_dir = optional($default_language)->dir ?? LanguageConst::NOT_REMOVABLE;
     }else{
         $default_language = Language::where('status',GlobalConst::ACTIVE)->first();
-        $default_language_dir = $default_language->dir ?? LanguageConst::NOT_REMOVABLE;
+        $default_language_dir = optional($default_language)->dir ?? LanguageConst::NOT_REMOVABLE;
     }
     return $default_language_dir;
 }
@@ -1964,14 +1964,27 @@ function agentGoogleTwoFactorVerificationTemplate($user) {
 
 
 function google_2fa_verify($secret_key,$code) {
-    $google2FA = new \PragmaRX\Google2FA\Google2FA();
-    if($google2FA->verifyKey($secret_key, $code,0) == false) {
+    if(empty($secret_key) || empty($code)) {
         throw ValidationException::withMessages([
-            'code'       => "Invalid authentication code",
+            'code' => "Secret key and code are required",
         ]);
         return false;
     }
-    return true;
+    try {
+        $google2FA = new \PragmaRX\Google2FA\Google2FA();
+        if($google2FA->verifyKey($secret_key, $code,0) == false) {
+            throw ValidationException::withMessages([
+                'code' => "Invalid authentication code",
+            ]);
+            return false;
+        }
+        return true;
+    } catch (\Exception $e) {
+        throw ValidationException::withMessages([
+            'code' => "Error verifying code: " . $e->getMessage(),
+        ]);
+        return false;
+    }
 }
 function google_2fa_verify_api($secret_key,$code) {
     $google2FA = new \PragmaRX\Google2FA\Google2FA();
@@ -1995,22 +2008,45 @@ function getTrxNum($length = 8)
     return $randomString;
 }
 function get_auth_guard() {
+    $user = null;
+    $userType = 'GUEST';
+    $guard = '';
+    
     if(auth()->guard("web")->check()) {
-        return "web";
-    }else if(auth()->guard("admin")->check()) {
-        return "admin";
-    }else if(auth()->guard("api")->check()) {
-        return "api";
-    }else if(auth()->guard("merchant")->check()) {
-        return "merchant";
-    }else if(auth()->guard("merchant_api")->check()) {
-        return "merchant_api";
-    }else if(auth()->guard("agent")->check()) {
-        return "agent";
-    }else if(auth()->guard("agent_api")->check()) {
-        return "agent_api";
+        $user = auth()->guard("web")->user();
+        $userType = 'USER';
+        $guard = "web";
+    } else if(auth()->guard("admin")->check()) {
+        $user = auth()->guard("admin")->user();
+        $userType = 'ADMIN';
+        $guard = "admin";
+    } else if(auth()->guard("api")->check()) {
+        $user = auth()->guard("api")->user();
+        $userType = 'USER';
+        $guard = "api";
+    } else if(auth()->guard("merchant")->check()) {
+        $user = auth()->guard("merchant")->user();
+        $userType = 'MERCHANT';
+        $guard = "merchant";
+    } else if(auth()->guard("merchant_api")->check()) {
+        $user = auth()->guard("merchant_api")->user();
+        $userType = 'MERCHANT';
+        $guard = "merchant_api";
+    } else if(auth()->guard("agent")->check()) {
+        $user = auth()->guard("agent")->user();
+        $userType = 'AGENT';
+        $guard = "agent";
+    } else if(auth()->guard("agent_api")->check()) {
+        $user = auth()->guard("agent_api")->user();
+        $userType = 'AGENT';
+        $guard = "agent_api";
     }
-    return "";
+    
+    return [
+        'user' => $user,
+        'type' => $userType,
+        'guard' => $guard
+    ];
 }
 function ticketType(){
     $active = UserSupportTicket::active()->count();
@@ -2775,12 +2811,26 @@ function freedom_countries($type){
 }
 function branch_required_countries($iso2,$bank_id){
     $branch_required_countries =["TZ","GH","UG","BJ","CM","TD","CI","CD","GA","MW","RW","SN","SL"];
-     // Check if the provided iso2 is in the branch_required_countries array
-     if (in_array($iso2, $branch_required_countries)) {
+    // Check if the provided iso2 is in the branch_required_countries array
+    if (in_array($iso2, $branch_required_countries)) {
         $flutterWaveGateway = PaymentGateway::where('type',"AUTOMATIC")->where('alias','flutterwave-money-out')->first();
+        if(!$flutterWaveGateway) {
+            return [
+                'status' => false,
+                'branches' => [],
+                'message' => "Payment gateway not configured properly",
+            ];
+        }
         $secretKey = getPaymentCredentials($flutterWaveGateway->credentials,'Secret key');
-        $base_url =getPaymentCredentials($flutterWaveGateway->credentials,'Base Url');
+        $base_url = getPaymentCredentials($flutterWaveGateway->credentials,'Base Url');
         //find out all branches
+        if(!function_exists('curl_init')){
+            return [
+                'status' => false,
+                'branches' => [],
+                'message' => "CURL is not enabled on this server",
+            ];
+        }
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -3040,14 +3090,20 @@ function systemCurrenciesCode(){
     $setup_currency_code = currenciesCode();
     $payment_gateway_code = gatewayCurrenciesCode();
 
-   $setup_currency_array = explode(',', $setup_currency_code);
-   $payment_gateway_array = explode(',', $payment_gateway_code);
+    if(empty($setup_currency_code) && empty($payment_gateway_code)) {
+        return '';
+    }
 
-   $merged_array = array_merge($setup_currency_array, $payment_gateway_array);
-   $unique_currency_codes = array_unique($merged_array);
-   $result = implode(',', $unique_currency_codes);
+    $setup_currency_array = !empty($setup_currency_code) ? explode(',', $setup_currency_code) : [];
+    $payment_gateway_array = !empty($payment_gateway_code) ? explode(',', $payment_gateway_code) : [];
 
-  return $result??[];
+    $merged_array = array_merge($setup_currency_array, $payment_gateway_array);
+    if(empty($merged_array)) {
+        return '';
+    }
+    
+    $unique_currency_codes = array_unique($merged_array);
+    return implode(',', $unique_currency_codes);
 
 }
 function systemCurrenciesCodeArray(){
@@ -3088,11 +3144,12 @@ function updateAbleCurrency(){
 
 }
 function filterValidCurrencies($currencies) {
+    if(empty($currencies)) return '';
     $currency_array = explode(',', $currencies);
     $filtered_array = array_filter($currency_array, function($code) {
         return preg_match('/^[A-Za-z]{3}$/', $code);
     });
-    return implode(',', $filtered_array);
+    return !empty($filtered_array) ? implode(',', $filtered_array) : '';
 }
 //live exchange rate code end
 function page_access($slug)

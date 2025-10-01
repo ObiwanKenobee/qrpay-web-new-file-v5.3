@@ -1,7 +1,7 @@
 @extends('admin.layouts.master')
 @php
     $app_local = get_default_language_code();
-    $system_default    = $default_language_code;
+    $system_default    = get_default_language_code();
 @endphp
 @push('css')
     <style>

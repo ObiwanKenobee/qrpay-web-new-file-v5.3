@@ -18,18 +18,24 @@ class SystemMaintenance
      */
     public function handle(Request $request, Closure $next)
     {
-        $system_maintenance = AdminSystemMaintenance::first();
-        if( $system_maintenance->status == 1){
-            if($request->routeIs('admin.*')){
-                return $next($request);
-            }else{
-                if ($request->path() !== '/') {
-                    return redirect('/'); // Redirect to home page
-                }
-                abort(503);
-            }
+        // Allow all access in development environment
+        if (config('app.env') === 'local' || env('DISABLE_MAINTENANCE_GUARD', false)) {
+            return $next($request);
         }
-        return $next($request);
 
+        $system_maintenance = AdminSystemMaintenance::first();
+        // Guard against null (fresh installs or missing record) and only act when enabled
+        if (!$system_maintenance || (int) $system_maintenance->status !== 1) {
+            return $next($request);
+        }
+
+        if ($request->routeIs('admin.*')) {
+            return $next($request);
+        } else {
+            if ($request->path() !== '/') {
+                return redirect('/'); // Redirect to home page
+            }
+            abort(503);
+        }
     }
 }

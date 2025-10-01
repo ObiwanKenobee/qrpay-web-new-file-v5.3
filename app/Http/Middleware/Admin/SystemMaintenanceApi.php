@@ -19,8 +19,13 @@ class SystemMaintenanceApi
      */
     public function handle(Request $request, Closure $next)
     {
+        // Optional override to ensure public accessibility in production without 500 fallback
+        if (env('DISABLE_MAINTENANCE_GUARD', false)) {
+            return $next($request);
+        }
+
         $system_maintenance = AdminSystemMaintenance::first();
-        if( $system_maintenance->status == 1){
+        if ($system_maintenance && (int) $system_maintenance->status === 1) {
             $data =[
                 'base_url'      => url("/"),
                 'image_path'    => files_asset_path_basename("error-images"),
@@ -31,9 +36,7 @@ class SystemMaintenanceApi
             ];
             $message = ['error'=>[__($system_maintenance->title??"")]];
             return Helpers::maintenance($message,$data);
-
         }
         return $next($request);
-
     }
 }

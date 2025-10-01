@@ -2,7 +2,7 @@
 
 @php
     $lang = selectedLang();
-    $system_default    = $default_language_code;
+    $system_default    = get_default_language_code();
     $banner_slug = Illuminate\Support\Str::slug(App\Constants\SiteSectionConst::BANNER_SECTION);
     $banner = App\Models\Admin\SiteSections::getData( $banner_slug)->first();
     $banner_floting_slug = Illuminate\Support\Str::slug(App\Constants\SiteSectionConst::BANNER_FLOTING);

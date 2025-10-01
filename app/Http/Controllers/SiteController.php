@@ -32,6 +32,33 @@ use App\Models\Admin\PaymentGateway as AdminPaymentGateway;
 class SiteController extends Controller
 {
     public function home(){
+        $wildResilience = [
+            'dove_dome' => app('wild-resilience')->getDoveDome(),
+            'dove_dome_symbol' => app('wild-resilience')->getDoveDomeSymbols(),
+            'peace_gardens' => app('wild-resilience')->getPeaceGardens(),
+            'therapy' => app('wild-resilience')->getTherapy(),
+            'guardian_network' => app('wild-resilience')->getGuardianNetwork(),
+        ];
+        // Demo: Set disaster mode flag (in production, set via backend logic)
+        session(['disaster_mode_active' => true]);
+
+        $wildResilienceService = app('wild-resilience');
+        $impactWallet = $wildResilienceService->getImpactWallet();
+        $communityBonds = [
+            'apy' => 7.2,
+            'currency' => 'KSh',
+            'user_investment' => 5000,
+            'impact_stats' => 'Solar Grid, Water Harvesting',
+        ];
+        $greenMpesa = [
+            'eco_tokens' => 120,
+            'impact' => 'Maasai Mara Conservancy',
+        ];
+        $educationBundles = [
+            ['name' => 'STEM Data Pack', 'type' => 'Free'],
+            ['name' => 'Finance Curriculum', 'type' => 'Subsidized'],
+            ['name' => 'Agriculture E-Learning', 'type' => 'Free'],
+        ];
 
         $basic_settings = BasicSettings::first();
         $page_title = $basic_settings->site_title??"Home";
@@ -39,7 +66,7 @@ class SiteController extends Controller
         $page_section   = SetupPage::where('slug','home')->with(['sections' => function($q){
             $q->where('status',true);
         }])->first();
-        return view('frontend.index',compact('page_title','app_urls','page_section'));
+    return view('frontend.index',compact('page_title','app_urls','page_section','impactWallet','communityBonds','greenMpesa','educationBundles','wildResilience'));
     }
     public function headerPage($parent_id){
         $selected_lan = selectedLang();

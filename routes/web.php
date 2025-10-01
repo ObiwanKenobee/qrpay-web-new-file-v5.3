@@ -21,8 +21,18 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-//landing pages
-Route::controller(SiteController::class)->group(function(){
+// QRPay landing alias - keep web middleware for sessions/errors
+Route::withoutMiddleware(['auth', 'verification.guard'])
+    ->middleware(['public.rate.limit:30,1', 'public.logger'])
+    ->group(function () {
+        // Alias path to the official landing page
+        Route::get('qr-pay/landing', fn () => redirect()->route('index'))->name('qrpay.landing');
+    });
+
+//landing pages - public access with rate limiting (keep web middleware for sessions/errors)
+Route::controller(SiteController::class)
+    ->middleware(['public.rate.limit:30,1', 'public.logger'])
+    ->group(function(){
     Route::get('/','home')->name('index');
     Route::get('about','about')->name('about');
     Route::get('service','service')->name('service');
@@ -33,17 +43,21 @@ Route::controller(SiteController::class)->group(function(){
     Route::get('agent-info','agentInfo')->name('agent');
     Route::get('merchant-info','merchant')->name('merchant');
     Route::get('contact','contact')->name('contact');
-    Route::post('contact/store','contactStore')->name('contact.store');
+    Route::post('contact/store','contactStore')->name('contact.store')->middleware('\Illuminate\Session\Middleware\StartSession', '\Illuminate\View\Middleware\ShareErrorsFromSession', '\App\Http\Middleware\VerifyCsrfToken');
     Route::get('change/{lang?}','changeLanguage')->name('lang');
     Route::get('page/{slug}','usefulPage')->name('useful.link');
-    Route::post('newsletter','newsletterSubmit')->name('newsletter.submit');
+    Route::post('newsletter','newsletterSubmit')->name('newsletter.submit')->middleware('\Illuminate\Session\Middleware\StartSession', '\Illuminate\View\Middleware\ShareErrorsFromSession', '\App\Http\Middleware\VerifyCsrfToken');
     Route::get('pagadito/success','pagaditoSuccess')->name('success');
     Route::get('pricing','pricing')->name('pricing')->middleware(['page_setup:pricing']);
     Route::get('section/{parent_id}','headerPage')->name('header.page');
 
 });
 
-Route::controller(DeveloperController::class)->prefix('developer')->name('developer.')->group(function(){
+Route::controller(DeveloperController::class)
+    ->prefix('developer')
+    ->name('developer.')
+    ->middleware(['public.rate.limit:60,1', 'public.logger'])
+    ->group(function(){
     Route::get('/','index')->name('index');
     Route::get('prerequisites','prerequisites')->name('prerequisites');
     Route::get('authentication','authentication')->name('authentication');
@@ -61,7 +75,7 @@ Route::controller(DeveloperController::class)->prefix('developer')->name('develo
 });
 
 //for sslcommerz callback urls(web)
-Route::controller(AddMoneyController::class)->prefix("add-money")->name("add.money.")->group(function(){
+Route::controller(AddMoneyController::class)->prefix("add-money")->name("add.money.")->withoutMiddleware(['web', 'auth', 'verification.guard'])->group(function(){
     //sslcommerz
     Route::post('sslcommerz/success','sllCommerzSuccess')->name('ssl.success');
     Route::post('sslcommerz/fail','sllCommerzFails')->name('ssl.fail');
@@ -76,14 +90,19 @@ Route::controller(UserAddMoneyController::class)->prefix("api/add-money")->name(
     Route::post('sslcommerz/cancel','sllCommerzCancel')->name('ssl.cancel');
 });
 //for Perfect Money Agent From Submit url
-Route::controller(AgentAddMoneyController::class)->prefix("agent/add-money")->name("agent.add.money.")->group(function(){
+Route::controller(AgentAddMoneyController::class)->prefix("agent/add-money")->name("agent.add.money.")->withoutMiddleware(['web', 'auth', 'verification.guard'])->group(function(){
     Route::get('redirect/form/{gateway}', 'redirectUsingHTMLForm')->name('payment.redirect.form');
 });
 
 //both merchants/users(PayLink)
-Route::controller(PaymentLinkController::class)->prefix('payment-link')->name('payment-link.')->group(function(){
+Route::controller(PaymentLinkController::class)
+    ->prefix('payment-link')
+    ->name('payment-link.')
+    ->withoutMiddleware(['web', 'auth', 'verification.guard'])
+    ->middleware(['public.rate.limit:20,1', 'public.logger'])
+    ->group(function(){
     Route::get('/share/{token}','paymentLinkShare')->name('share');
-    Route::post('/submit','paymentLinkSubmit')->name('submit')->middleware('app.mode');
+    Route::post('/submit','paymentLinkSubmit')->name('submit')->middleware(['app.mode', '\Illuminate\Session\Middleware\StartSession', '\Illuminate\View\Middleware\ShareErrorsFromSession', '\App\Http\Middleware\VerifyCsrfToken']);
     Route::get('/transaction/success/{token}','transactionSuccess')->name('transaction.success');
     //route for payment gateway
     Route::prefix('gateway/payment')->name('gateway.payment.')->group(function(){
@@ -120,7 +139,7 @@ Route::controller(PaymentLinkController::class)->prefix('payment-link')->name('p
     });
     //wallet system login by user
     Route::prefix('user/wallet')->name('user.wallet.')->group(function(){
-        Route::get('login/{token}','userLogin')->name('login')->middleware(['web','auth']);
+        Route::get('login/{token}','userLogin')->name('login')->withoutMiddleware(['web', 'auth', 'verification.guard']);
 
     });
 });

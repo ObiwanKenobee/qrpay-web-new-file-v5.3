@@ -54,7 +54,11 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+'url' => env('APP_URL', 'http://localhost'),
+
+    // Official landing page to use for error-page "Back To Home" buttons
+    // Set OFFICIAL_LANDING_URL in .env to override; falls back to APP_URL
+    'landing_url' => env('OFFICIAL_LANDING_URL', env('APP_URL', 'http://localhost')),
 
     'asset_url' => env('ASSET_URL'),
 
@@ -195,6 +199,8 @@ return [
         App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\DisasterModeServiceProvider::class,
+        App\Providers\WildResilienceServiceProvider::class,
 
         // Image Intervention
         Intervention\Image\ImageServiceProvider::class,

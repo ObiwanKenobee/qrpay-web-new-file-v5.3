@@ -8,6 +8,15 @@
     <title>{{ (isset($page_title) ? __($page_title) : __("Payment Process")) }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet"> 
 
+    @php
+        // Ensure basic settings are available to all partials used by this layout
+        try {
+            $basic_settings = $basic_settings ?? (\App\Models\Admin\BasicSettings::first() ?? null);
+        } catch (\Throwable $e) {
+            $basic_settings = null;
+        }
+    @endphp
+
     @include('partials.header-asset')
     
     @stack("css")

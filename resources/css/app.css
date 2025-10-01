@@ -1,3 +1,49 @@
+/* Header Innovations */
+.header-impact-wallet .badge {
+	font-size: 0.95em;
+	margin-left: 4px;
+}
+.header-community-bonds .badge {
+	font-size: 0.92em;
+	margin-left: 4px;
+}
+.header-green-mpesa .badge {
+	font-size: 0.95em;
+	background: linear-gradient(90deg,#43ea7c 0%,#1e7e34 100%);
+	box-shadow: 0 2px 8px rgba(40,167,69,0.08);
+}
+.header-education-bundles .dropdown-menu {
+	min-width: 220px;
+}
+/* Disaster Mode Banner */
+.disaster-mode-banner {
+	border-radius: 0 0 12px 12px;
+	box-shadow: 0 2px 12px rgba(255,152,0,0.12);
+	letter-spacing: 0.02em;
+	font-size: 1.08rem;
+	animation: disasterPulse 1.5s infinite alternate;
+}
+@keyframes disasterPulse {
+	0% { filter: brightness(1); }
+	100% { filter: brightness(1.15); }
+}
+/* Real-Time Header Status */
+.header-realtime-status {
+	min-height: 48px;
+	font-size: 1.05rem;
+	border-radius: 0 0 12px 12px;
+	box-shadow: 0 2px 8px rgba(0,123,255,0.04);
+}
+.header-realtime-status .account-balance-amount {
+	font-weight: 600;
+	color: #007bff;
+	margin-left: 4px;
+}
+.header-realtime-status .notif-count {
+	font-size: 0.85em;
+	vertical-align: top;
+	margin-left: 2px;
+}
 /* Floating Header Styles */
 .floating-header {
 	position: fixed;

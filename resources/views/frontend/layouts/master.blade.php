@@ -22,7 +22,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta property="og:title" content="{{ __(@$seo_data->title) }}">
-    <meta name="keywords" content="{{ implode(',',@$seo_data->tags) }}">
+    <meta name="keywords" content="{{ !empty($seo_data->tags) ? implode(',', $seo_data->tags) : '' }}">
     <meta property="og:description" content="{{ __(@$seo_data->desc) }}">
     <meta property="og:image" content="{{get_image(@$seo_data->image,'seo') }}">
     <meta property="og:image:width" content="140">

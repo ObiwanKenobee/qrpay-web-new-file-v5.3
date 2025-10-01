@@ -32,12 +32,17 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->routes(function () {
 
+            $basic_settings = null;
             try {
                 if (Schema::hasTable('basic_settings')) {
                     $basic_settings = BasicSettings::first();
                 }
             } catch (\Throwable $e) {
-                $basic_settings = null;
+                // In development, use default admin prefix if table doesn't exist
+                if (config('app.env') === 'local') {
+                    $basic_settings = new \stdClass();
+                    $basic_settings->admin_prefix = 'admin';
+                }
             }
 
 

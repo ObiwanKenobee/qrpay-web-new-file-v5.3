@@ -12,7 +12,8 @@ class TrustProxies extends Middleware
      *
      * @var array<int, string>|string|null
      */
-    protected $proxies;
+    // Trust all proxies (e.g., behind ELB/ALB/Cloudflare) so scheme/host are detected correctly
+    protected $proxies = '*';
 
     /**
      * The headers that should be used to detect proxies.

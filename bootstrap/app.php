@@ -52,4 +52,10 @@ $app->singleton(
 |
 */
 
+// Suppress deprecation notices from third-party packages during local development
+// to reduce noise on PHP 8.4+. Remove this if you want to see deprecations.
+if ((($_ENV['APP_ENV'] ?? null) === 'local') || (($_SERVER['APP_ENV'] ?? null) === 'local')) {
+    error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+}
+
 return $app;

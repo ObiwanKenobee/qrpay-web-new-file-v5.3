@@ -1,5 +1,5 @@
 <!-- favicon -->
-<link rel="shortcut icon" href="{{ get_fav($basic_settings) }}" type="image/x-icon">
+<link rel="shortcut icon" href="{{ get_fav($basic_settings ?? null) }}" type="image/x-icon">
 <!-- fontawesome css link -->
    <!-- fontawesome css link -->
    <link rel="stylesheet" href="{{ asset('frontend/') }}/css/fontawesome-all.min.css">

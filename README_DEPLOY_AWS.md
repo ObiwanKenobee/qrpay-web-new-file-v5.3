@@ -45,13 +45,13 @@ ALB health check
 
 Initial deployment steps
 1) Create log groups and ECS cluster (optional helper)
-   AWS_REGION=... AWS_ACCOUNT_ID=... ECS_CLUSTER=... ECS_SERVICE=... \
-   ECS_WORKER_SERVICE=... ECS_SUBNETS=subnet-1,subnet-2 ECS_SECURITY_GROUPS=sg-1 \
-   bash scripts/aws/bootstrap-ecs.sh
+  AWS_REGION=... AWS_ACCOUNT_ID=... ECS_CLUSTER=... ECS_SERVICE=... \
+  ECS_WORKER_SERVICE=... ECS_SUBNETS=subnet-1,subnet-2 ECS_SECURITY_GROUPS=sg-1 \
+  bash scripts/aws/bootstrap-ecs.sh
 
 2) Provision ALB + target group and wire to ECS service (outside of this repo)
-   - Health path: /health.php
-   - Rolling update: minHealthy=100, maxPercent=200; enable circuit breaker + rollback
+  - Health path: /health.php
+  - Rolling update: minHealthy=100, maxPercent=200; enable circuit breaker + rollback
 
 3) Push to main to deploy web service (and optionally worker)
    - deploy-ecs.yml builds image, optionally runs migrations as a one-off task, then updates ECS service

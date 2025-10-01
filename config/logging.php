@@ -117,6 +117,13 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+
+        'public-access' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/public-access.log'),
+            'level' => 'info',
+            'days' => 30,
+        ],
     ],
 
 ];

@@ -37,3 +37,6 @@ Route::get("file/download/{path_source}/{name}",function($path_source,$file_name
 Route::controller(GlobalController::class)->group(function(){
     Route::post('flutterwave/withdraw_webhooks','webHookResponse')->name('webhook.response')->withoutMiddleware(['web']);
 });
+
+// Include supply chain tag routes
+require __DIR__ . '/api/supply-chain-tags.php';

@@ -2,7 +2,7 @@
     $default_lang_code = language_const()::NOT_REMOVABLE;
     $system_default_lang = get_default_language_code();
     $languages_for_js_use = $languages->toJson();
-    $system_default    = $default_language_code;
+    $system_default    = get_default_language_code();
 @endphp
 
 @extends('admin.layouts.master')

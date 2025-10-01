@@ -60,6 +60,8 @@ class Kernel extends HttpKernel
         'auth'                              => \App\Http\Middleware\Authenticate::class,
         'checkStatus'                       => \App\Http\Middleware\CheckSmsStatus::class,
         'auth.basic'                        => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'public.rate.limit'                 => \App\Http\Middleware\PublicRouteRateLimiter::class,
+        'public.logger'                     => \App\Http\Middleware\PublicRouteLogger::class,
         'auth.session'                      => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers'                     => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can'                               => \Illuminate\Auth\Middleware\Authorize::class,
@@ -105,5 +107,6 @@ class Kernel extends HttpKernel
         'user.pin.setup.guard'              => \App\Http\Middleware\User\PinSetupGuard::class,
         'merchant.pin.setup.guard'          => \App\Http\Middleware\Merchant\PinSetupGuard::class,
         'agent.pin.setup.guard'             => \App\Http\Middleware\Agent\PinSetupGuard::class,
+        'validate.supply.chain.tag'         => \App\Http\Middleware\ValidateSupplyChainTag::class,
     ];
 }
