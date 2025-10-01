@@ -7,7 +7,7 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Start Header
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-<header class="header-section position-sticky">
+<header class="header-section floating-header" id="floatingHeader">
     <div class="header">
         <div class="header-bottom-area">
             <div class="container custom-container">

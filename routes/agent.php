@@ -151,8 +151,8 @@ Route::prefix("agent")->name("agent.")->group(function(){
             Route::get("cancel/response/{gateway}",'cancelGlobal')->name('payment.global.cancel');
 
             // POST Route For Unauthenticated Request
-            Route::post('success/response/{gateway}', 'postSuccess')->name('payment.global.success')->withoutMiddleware(['auth:agent','verification.guard.agent','agent.google.two.factor','agent.pin.setup.guard']);
-            Route::post('cancel/response/{gateway}', 'postCancel')->name('payment.global.cancel')->withoutMiddleware(['auth:agent','verification.guard.agent','agent.google.two.factor','agent.pin.setup.guard']);
+            Route::post('success/response/{gateway}', 'postSuccess')->name('payment.global.success.post')->withoutMiddleware(['auth:agent','verification.guard.agent','agent.google.two.factor','agent.pin.setup.guard']);
+            Route::post('cancel/response/{gateway}', 'postCancel')->name('payment.global.cancel.post')->withoutMiddleware(['auth:agent','verification.guard.agent','agent.google.two.factor','agent.pin.setup.guard']);
 
             // authorize payment
             Route::get('authorize-card-info/{identifier}','authorizeCardInfo')->name('authorize.card.info');
