@@ -212,8 +212,8 @@ Route::prefix('user')->group(function(){
                 Route::get("cancel/response/{gateway}",'cancelGlobal')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api','user.pin.setup.guard'])->name("api.user.add.money.payment.global.cancel");
 
                 // POST Route For Unauthenticated Request
-                Route::post('success/response/{gateway}', 'postSuccess')->name('api.user.add.money.payment.global.success')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api','user.pin.setup.guard']);
-                Route::post('cancel/response/{gateway}', 'postCancel')->name('api.user.add.money.payment.global.cancel')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api','user.pin.setup.guard']);
+                Route::post('success/response/{gateway}', 'postSuccess')->name('api.user.add.money.payment.global.success.post')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api','user.pin.setup.guard']);
+                Route::post('cancel/response/{gateway}', 'postCancel')->name('api.user.add.money.payment.global.cancel.post')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api','user.pin.setup.guard']);
 
                 //Authorize
                 Route::post('authorize-payment-submit','authorizePaymentSubmit')->name('api.user.add.money.authorize.payment.submit');
@@ -239,7 +239,7 @@ Route::prefix('user')->group(function(){
             });
 
             //request Money
-            Route::controller(RequestMoneyController::class)->prefix("request-money")->middleware(['user.pin.setup.guard'])->group(function(){
+            Route::controller(RequestMoneyController::class)->prefix("request-money")->name('api.user.request.money.')->middleware(['user.pin.setup.guard'])->group(function(){
                 Route::get('/','index')->name('index');
                 Route::post('submit','submit')->name('submit')->middleware('api.kyc');
                 Route::post('check/user','checkUser');

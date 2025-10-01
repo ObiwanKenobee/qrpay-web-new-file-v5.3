@@ -38,7 +38,7 @@ Route::prefix("user")->name("user.")->group(function(){
     Route::controller(DashboardController::class)->group(function(){
         Route::get('dashboard','index')->name('dashboard');
         Route::get('qr/scan/{qr_code}','qrScan')->name('qr.scan');
-        Route::get('agent/qr/scan/{qr_code}','agentQrScan')->name('qr.scan');
+        Route::get('agent/qr/scan/{qr_code}','agentQrScan')->name('agent.qr.scan');
         Route::get('merchant/qr/scan/{qr_code}','merchantQrScan')->name('merchant.qr.scan');
         Route::post('logout','logout')->name('logout');
         Route::delete('delete/account','deleteAccount')->name('delete.account')->middleware('app.mode');
@@ -138,8 +138,8 @@ Route::prefix("user")->name("user.")->group(function(){
             Route::get("cancel/response/{gateway}",'cancelGlobal')->name('payment.global.cancel');
 
             // POST Route For Unauthenticated Request
-            Route::post('success/response/{gateway}', 'postSuccess')->name('payment.global.success')->withoutMiddleware(['auth','verification.guard','user.google.two.factor','user.pin.setup.guard']);
-            Route::post('cancel/response/{gateway}', 'postCancel')->name('payment.global.cancel')->withoutMiddleware(['auth','verification.guard','user.google.two.factor','user.pin.setup.guard']);
+            Route::post('success/response/{gateway}', 'postSuccess')->name('payment.global.success.post')->withoutMiddleware(['auth','verification.guard','user.google.two.factor','user.pin.setup.guard']);
+            Route::post('cancel/response/{gateway}', 'postCancel')->name('payment.global.cancel.post')->withoutMiddleware(['auth','verification.guard','user.google.two.factor','user.pin.setup.guard']);
 
             // authorize payment
             Route::get('authorize-card-info/{identifier}','authorizeCardInfo')->name('authorize.card.info');
@@ -216,7 +216,7 @@ Route::prefix("user")->name("user.")->group(function(){
                 Route::get('edit/customer','editCustomer')->name('edit.customer')->middleware('kyc.verification.guard');
                 Route::put('update/customer','updateCustomer')->name('update.customer')->middleware('kyc.verification.guard');
 
-                Route::post('create','cardBuy')->name('create')->middleware('kyc.verification.guard');
+                Route::post('create','cardBuy')->name('create.submit')->middleware('kyc.verification.guard');
                 Route::get('fund/page/{id}','cardFundPage')->name('fund.page')->middleware('kyc.verification.guard');
                 Route::post('fund','cardFundConfirm')->name('fund')->middleware('kyc.verification.guard');
                 Route::get('details/{card_id}','cardDetails')->name('details');

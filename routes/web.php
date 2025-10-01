@@ -101,8 +101,8 @@ Route::controller(PaymentLinkController::class)->prefix('payment-link')->name('p
         Route::get("cancel/response/{gateway}",'cancelGlobal')->name('global.cancel');
 
         // POST Route For Unauthenticated Request
-        Route::post('success/response/{gateway}', 'postSuccess')->name('global.success')->withoutMiddleware(['web']);
-        Route::post('cancel/response/{gateway}', 'postCancel')->name('global.cancel')->withoutMiddleware(['web']);
+        Route::post('success/response/{gateway}', 'postSuccess')->name('global.success.post')->withoutMiddleware(['web']);
+        Route::post('cancel/response/{gateway}', 'postCancel')->name('global.cancel.post')->withoutMiddleware(['web']);
 
         //sslcommerz
         Route::post('sslcommerz/success','sllCommerzSuccess')->name('ssl.success');

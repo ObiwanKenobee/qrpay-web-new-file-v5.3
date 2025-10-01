@@ -138,8 +138,8 @@ Route::prefix('agent')->group(function(){
                 Route::get("cancel/response/{gateway}",'cancelGlobal')->withoutMiddleware(['auth:api','agent.api','CheckStatusApiAgent','verification.guard.api','agent.google.two.factor.api','agent.pin.setup.guard'])->name("api.agent.add.money.payment.global.cancel");
 
                 // POST Route For Unauthenticated Request
-                Route::post('success/response/{gateway}', 'postSuccess')->name('api.agent.add.money.payment.global.success')->withoutMiddleware(['auth:api','agent.api','CheckStatusApiAgent','verification.guard.api','agent.google.two.factor.api','agent.pin.setup.guard']);
-                Route::post('cancel/response/{gateway}', 'postCancel')->name('api.agent.add.money.payment.global.cancel')->withoutMiddleware(['auth:api','agent.api','CheckStatusApiAgent','verification.guard.api','agent.google.two.factor.api','agent.pin.setup.guard']);
+                Route::post('success/response/{gateway}', 'postSuccess')->name('api.agent.add.money.payment.global.success.post')->withoutMiddleware(['auth:api','agent.api','CheckStatusApiAgent','verification.guard.api','agent.google.two.factor.api','agent.pin.setup.guard']);
+                Route::post('cancel/response/{gateway}', 'postCancel')->name('api.agent.add.money.payment.global.cancel.post')->withoutMiddleware(['auth:api','agent.api','CheckStatusApiAgent','verification.guard.api','agent.google.two.factor.api','agent.pin.setup.guard']);
 
                 //Authorize
                 Route::post('authorize-payment-submit','authorizePaymentSubmit')->name('api.agent.add.money.authorize.payment.submit');
