@@ -1,0 +1,36 @@
+# Ignore patterns when packaging from source with EB CLI
+# Drag-and-drop ZIPs won’t use this, but it helps future workflows.
+
+# VCS and IDE
+.git/
+.gitignore
+.gitattributes
+.vscode/
+.github/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn.lock
+
+# PHP vendor is installed on instance
+vendor/
+composer.phar
+
+# Tests and docs
+tests/
+README*.md
+
+# Docker and CI
+Dockerfile
+.dockerignore
+docker/
+
+# Local env and caches
+.env
+.env.*
+storage/logs/*
+storage/framework/cache/*
+
+# Build artifacts we don’t want to upload as source
+*.zip
