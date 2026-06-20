@@ -13,6 +13,9 @@
     $s_platform     = Agent::platform();
     $s_agent        = request()->header('User-Agent');
 
+    if (!isset($basic_settings)) {
+        $basic_settings = \App\Models\Admin\BasicSettings::first();
+    }
 @endphp
 <!DOCTYPE html>
 <html lang="{{ get_default_language_code() }}">

@@ -33,17 +33,17 @@ class BasicSettings extends Model
     public function mailConfig() {
 
     }
-    public function scopeSitename($query, $pageTitle)
+    public function sitename($pageTitle)
     {
         $pageTitle = empty($pageTitle) ? '' : ' - ' . $pageTitle;
         return $this->site_name . $pageTitle;
     }
-    public function scopeSitenameAgent($query, $pageTitle)
+    public function sitenameAgent($pageTitle)
     {
         $pageTitle = empty($pageTitle) ? '' : ' - ' . $pageTitle;
         return $this->agent_site_name . $pageTitle;
     }
-    public function scopeSitenameMerchant($query, $pageTitle)
+    public function sitenameMerchant($pageTitle)
     {
         $pageTitle = empty($pageTitle) ? '' : ' - ' . $pageTitle;
         return $this->merchant_site_name . $pageTitle;
